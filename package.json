@@ -1,0 +1,43 @@
+{
+  "name": "broken-error-interceptor",
+  "version": "1.0.0",
+  "description": "A minimal reproduction of a Nest.js bug where body-parser throws an error that a custom interceptor cannot catch",
+  "scripts": {
+    "clean": "rimraf dist",
+    "build": "tsc -p tsconfig.build.json",
+    "build:all": "tsc -p tsconfig.json",
+    "start:dev": "tsc-watch -p tsconfig.build.json --onSuccess \"node dist/src/main.js\" | yarn exec -s bunyan",
+    "test": "yarn run -s build && jest --config ./jest-unit.json",
+    "test:e2e": "yarn clean && yarn build:all && jest --config ./jest-e2e.json"
+  },
+  "author": "Tim Garthwaite <tim@hydrow.com>",
+  "license": "ISC",
+  "engines": {
+    "node": "10.15.3",
+    "yarn": "1.16.0"
+  },
+  "dependencies": {
+    "@eropple/nestjs-bunyan": "0.5.7",
+    "@godaddy/terminus": "4.2.1",
+    "@nestjs/common": "6.8.4",
+    "@nestjs/core": "6.8.4",
+    "@nestjs/platform-express": "6.8.4",
+    "@nestjs/typeorm": "6.2.0",
+    "bunyan": "1.8.12",
+    "express": "4.17.1",
+    "lodash": "4.17.15",
+    "reflect-metadata": "0.1.13",
+    "rxjs": "6.5.3",
+    "source-map-support": "0.5.13",
+    "typeorm": "0.2.20"
+  },
+  "devDependencies": {
+    "@types/express": "4.17.1",
+    "@types/jest": "24.0.8",
+    "@types/lodash": "4.14.144",
+    "jest": "24.9.0",
+    "rimraf": "3.0.0",
+    "tsc-watch": "4.0.0",
+    "typescript": "3.7.2"
+  }
+}

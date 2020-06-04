@@ -1,0 +1,9 @@
+{
+    "moduleFileExtensions": [
+        "js",
+        "json"
+    ],
+    "rootDir": "./dist",
+    "testEnvironment": "node",
+    "testRegex": "\\.e2e-spec\\.js$"
+}
