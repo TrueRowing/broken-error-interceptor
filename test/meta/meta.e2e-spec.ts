@@ -3,14 +3,17 @@ import { HttpStatus } from '@nestjs/common';
 
 describe('Meta controller', () => {
 
-    describe('POST /meta/fail', () => {
+    describe('GET /meta/fail', () => {
         it('returns 500 INTERNAL SERVER ERROR', done => {
             const data = JSON.stringify({value: 'Pete'});
             const options = {
+                headers: {
+                    'X-Correlation-Id': 'GET /meta/fail test',
+                },
                 hostname: 'localhost',
-                port: 3000,
-                path: '/meta/fail',
                 method: 'GET',
+                path: '/meta/fail',
+                port: 3000,
             }
             const req = http.request(options, res => {
                 console.log(`statusCode: ${res.statusCode}`);
@@ -35,14 +38,15 @@ describe('Meta controller', () => {
             it('returns 201 CREATED', done => {
                 const data = JSON.stringify({ value: 'Pete' });
                 const options = {
-                    hostname: 'localhost',
-                    port: 3000,
-                    path: '/meta/echo',
-                    method: 'POST',
                     headers: {
-                        'Content-Type': 'application/json',
                         'Content-Length': data.length,
+                        'Content-Type': 'application/json',
+                        'X-Correlation-Id': 'POST /meta/echo success case',
                     },
+                    hostname: 'localhost',
+                    method: 'POST',
+                    path: '/meta/echo',
+                    port: 3000,
                 }
                 const req = http.request(options, res => {
                     console.log(`statusCode: ${res.statusCode}`);
@@ -71,9 +75,10 @@ describe('Meta controller', () => {
                     path: '/meta/echo',
                     method: 'POST',
                     headers: {
-                        'Content-Type': 'application/json',
                         // Force it to expect an extra byte
                         'Content-Length': data.length + 1,
+                        'Content-Type': 'application/json',
+                        'X-Correlation-Id': 'POST /meta/echo failure case',
                     },
                 }
                 const req = http.request(options, res => {

@@ -3,9 +3,11 @@ import * as _ from 'lodash';
 
 import { ArgumentsHost, Catch, HttpException, HttpStatus, Injectable, Scope } from '@nestjs/common';
 import { BaseExceptionFilter } from '@nestjs/core';
+import { ROOT_LOGGER } from '../logging';
+import { Bunyan } from '@eropple/nestjs-bunyan/index';
 
 @Catch()
-@Injectable({ scope: Scope.REQUEST })
+@Injectable({ scope: Scope.DEFAULT })
 export class CustomExceptionFilter extends BaseExceptionFilter {
 
     async catch(err: unknown, host: ArgumentsHost) {
@@ -21,6 +23,13 @@ export class CustomExceptionFilter extends BaseExceptionFilter {
         req: any,
         res: Express.Response,
     ): void {
+        const logger = ROOT_LOGGER.child({
+            component: this.constructor.name,
+            err,
+            method: req.method,
+            route: req.route.path,
+            url: req.url,
+        });
         const body: { [key: string]: any } = {
             status: 500,
             path: req.url,
@@ -40,21 +49,12 @@ export class CustomExceptionFilter extends BaseExceptionFilter {
                 body.message = err.message;
             }
         } else {
-            // this will be right above the actual error in any search by correlation ID,
-            // so I don't feel like we need to repeat the error here.
-            console.error('The error thrown in this HTTP call is not of subtype Error.');
+            logger.error('The error thrown in this HTTP call is not of subtype Error.');
         }
-        const logContext: { [key: string]: any } = {
-            body,
-            err,
-            method: req.method,
-            route: req.route.path,
-            url: req.url,
-        };
         if (400 <= body.status && body.status < 500) {
-            console.info(`Client error caught from ${req.url}.`, logContext);
+            logger.info({ body }, `Client error caught from ${req.url}.`);
         } else {
-            console.error(`Server error caught from ${req.url}.`, logContext);
+            logger.error({ body }, `Server error caught from ${req.url}.`);
         }
         res.status(body.status).json(body);
     }
