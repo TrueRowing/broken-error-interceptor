@@ -1,6 +1,5 @@
 import * as http from 'http';
 import * as superTest from 'supertest';
-import { URL } from 'url';
 
 import { HttpStatus, INestApplication } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
