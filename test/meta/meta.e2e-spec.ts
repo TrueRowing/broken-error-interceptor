@@ -1,5 +1,6 @@
 import * as http from 'http';
 import * as superTest from 'supertest';
+import { URL } from 'url';
 
 import { HttpStatus, INestApplication } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
@@ -51,20 +52,41 @@ describe('Meta controller', () => {
         });
 
         describe('an invalid POST that times out', () => {
-            it('returns 400 BAD REQUEST', async () => {
+            it('returns 400 BAD REQUEST', done => {
                 const value = 'Pete';
-                const data = { value };
-                const req = request()
-                    .post('/meta/echo')
-                    // Force it to expect an extra byte
-                    .set('Content-Length', (JSON.stringify(data).length + 1).toString())
-                    .set('X-Correlation-Id', 'POST /meta/echo failure case')
-                    .send(data);
-                await new Promise(resolve => setTimeout(resolve, 100));
-                req.abort();
-                req.end();
-                const res = await req;
-                expect(res.status).toBe(HttpStatus.BAD_REQUEST);
+                const data = JSON.stringify({ value });
+                const options = {
+                    hostname: 'localhost',
+                    port: 3000,
+                    path: '/meta/echo',
+                    method: 'POST',
+                    headers: {
+                        'Content-Length': data.length + 1,
+                        'Content-Type': 'application/json',
+                        'X-Correlation-Id': 'POST /meta/echo success case',
+                    },
+                }
+                app.listen(options.port, () => {
+                    const req = http.request(options, res => {
+                        console.log(`statusCode: ${res.statusCode}`);
+                        process.stdout.write('Reply: ');
+                        res.on('data', d => {
+                            process.stdout.write(d);
+                        });
+                        res.on('end', () => {
+                            expect(res.statusCode).toBe(HttpStatus.BAD_REQUEST);
+                            done();
+                        });
+                    });
+                    req.on('error', err => {
+                        done(err);
+                    });
+                    req.write(data);
+                    setTimeout(() => {
+                        req.abort();
+                        req.end();
+                    }, 100);
+                });
             });
         });
     });
