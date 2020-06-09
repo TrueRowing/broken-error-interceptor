@@ -78,7 +78,11 @@ describe('Meta controller', () => {
                         });
                     });
                     req.on('error', err => {
-                        done(err);
+                        if (err.message === 'socket hang up') {
+                            done();
+                        } else {
+                            done(err);
+                        }
                     });
                     req.write(data);
                     setTimeout(() => {

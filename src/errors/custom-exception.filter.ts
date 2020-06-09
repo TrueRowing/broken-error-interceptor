@@ -27,7 +27,7 @@ export class CustomExceptionFilter extends BaseExceptionFilter {
             component: this.constructor.name,
             err,
             method: req.method,
-            route: req.route.path,
+            route: req.route?.path ?? req.path,
             url: req.url,
         });
         const body: { [key: string]: any } = {
@@ -46,7 +46,8 @@ export class CustomExceptionFilter extends BaseExceptionFilter {
             body.stack = errorStack;
             if (err instanceof HttpException) {
                 body.status = err.getStatus();
-                body.message = err.message;
+            } else if (err.name === 'BadRequestError') {
+                body.status = HttpStatus.BAD_REQUEST;
             }
         } else {
             logger.error('The error thrown in this HTTP call is not of subtype Error.');
